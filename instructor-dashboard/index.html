@@ -3,23 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Attendance Scanner - Anti-Screenshot</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Instructor Dashboard - CSE 210 Attendance</title>
+    <link rel="stylesheet" href="../styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
-        <!-- Student View -->
+        <!-- Instructor Dashboard -->
         <div class="view active">
             <main>
-                <div class="qr-container">
-                    <h1>CSE 210: Attendance</h1>
-                    <div id="qrCode">
-                        <p>Generating QR code...</p>
+                <div class="dashboard-container">
+                    <!-- URL Management Section -->
+                    <div class="url-management">
+                        <h2>Manage Google Form URLs</h2>
+                        <div class="url-input-section">
+                            <div class="input-group">
+                                <input type="text" id="formName" placeholder="Form Name (e.g., Lecture 1, Quiz 2)" class="form-input">
+                                <input type="url" id="formUrl" placeholder="Google Form URL" class="form-input">
+                                <input type="url" id="sheetUrl" placeholder="Google Sheet URL (for responses)" class="form-input">
+                                <button id="addFormBtn" class="btn btn-primary">Add Form</button>
+                            </div>
+                        </div>
+                        
+                        <div class="forms-list">
+                            <h3>Active Forms</h3>
+                            <div id="formsList" class="forms-container">
+                                <p class="no-forms">No forms added yet. Add your first form above.</p>
+                            </div>
+                        </div>
                     </div>
-                    <p class="qr-instruction">Scan this QR code with your phone camera</p>
-                    <div id="formInfo" class="form-info">
-                        <p>Form: <span id="currentFormName">Loading...</span></p>
+
+                    <!-- Controls Section -->
+                    <div class="controls-section">
+                        <h2>Student View Controls</h2>
+                        <div class="controls">
+                            <button id="newSessionBtn" class="btn btn-primary">New Session</button>
+                            <button id="refreshBtn" class="btn btn-secondary">Refresh QR</button>
+                            <button id="toggleAutoRefresh" class="btn btn-secondary">Auto Refresh: ON</button>
+                        </div>
+                        <div class="session-info">
+                            <p><strong>Current Session:</strong> <span id="currentSessionId">Loading...</span></p>
+                            <p><strong>Auto Refresh:</strong> <span id="autoRefreshStatus">Every 5 seconds</span></p>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -581,8 +606,8 @@
             }
         }
 
-        // Student View QR Scanner
-        class StudentQRScanner {
+        // Anti-Screenshot Attendance QR Scanner
+        class InstructorDashboard {
             constructor() {
                 this.currentSessionId = null;
                 this.formManager = new FormManager();
@@ -594,6 +619,7 @@
 
             init() {
                 this.generateNewSession();
+                this.setupEventListeners();
                 this.startQRRefreshCycle();
                 this.updateFormInfo();
             }
@@ -607,7 +633,15 @@
             generateNewSession() {
                 this.currentSessionId = this.generateSessionId();
                 this.patternId = 0; // Reset pattern ID for new session
+                this.updateSessionInfo();
                 this.generateQRCode();
+            }
+
+            updateSessionInfo() {
+                const currentSessionIdElement = document.getElementById('currentSessionId');
+                if (currentSessionIdElement) {
+                    currentSessionIdElement.textContent = this.currentSessionId;
+                }
             }
 
             async generateQRCode() {
@@ -679,7 +713,7 @@
                         <div class="error">
                             <h3>QR Code Generation Failed</h3>
                             <p>Error: ${error.message}</p>
-                            <button onclick="window.studentQRScanner.generateQRCode()">Retry</button>
+                            <button onclick="window.instructorDashboard.generateQRCode()">Retry</button>
                         </div>
                     `;
                 }
@@ -690,6 +724,7 @@
                 this.qrRefreshInterval = setInterval(() => {
                     this.patternId++;
                     this.generateQRCode();
+                    this.updateSessionInfo();
                     console.log('QR code refreshed with new pattern ID:', this.patternId);
                 }, this.qrGenerator.refreshInterval);
             }
@@ -700,6 +735,151 @@
                     this.qrRefreshInterval = null;
                 }
                 this.qrGenerator.stopCountdown();
+            }
+
+            setupEventListeners() {
+                // Dashboard controls
+                const newSessionBtn = document.getElementById('newSessionBtn');
+                const refreshBtn = document.getElementById('refreshBtn');
+                const toggleAutoRefreshBtn = document.getElementById('toggleAutoRefresh');
+
+                if (newSessionBtn) {
+                    newSessionBtn.addEventListener('click', () => {
+                        this.stopQRRefreshCycle();
+                        this.generateNewSession();
+                        this.startQRRefreshCycle();
+                        this.showNotification('New session generated!', 'success');
+                    });
+                }
+
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', () => {
+                        this.patternId++;
+                        this.generateQRCode();
+                        this.updateSessionInfo();
+                        this.showNotification('QR code refreshed!', 'success');
+                    });
+                }
+
+                if (toggleAutoRefreshBtn) {
+                    toggleAutoRefreshBtn.addEventListener('click', () => {
+                        this.autoRefreshEnabled = !this.autoRefreshEnabled;
+                        if (this.autoRefreshEnabled) {
+                            this.startQRRefreshCycle();
+                            toggleAutoRefreshBtn.textContent = 'Auto Refresh: ON';
+                            this.showNotification('Auto refresh enabled', 'success');
+                        } else {
+                            this.stopQRRefreshCycle();
+                            toggleAutoRefreshBtn.textContent = 'Auto Refresh: OFF';
+                            this.showNotification('Auto refresh disabled', 'info');
+                        }
+                    });
+                }
+
+                // Form management
+                this.setupFormManagement();
+
+                // Auto-refresh session every 5 minutes for security
+                setInterval(() => {
+                    this.stopQRRefreshCycle();
+                    this.generateNewSession();
+                    this.startQRRefreshCycle();
+                    console.log('Session auto-refreshed for security');
+                }, 5 * 60 * 1000); // 5 minutes
+            }
+
+            setupFormManagement() {
+                const addFormBtn = document.getElementById('addFormBtn');
+                const formNameInput = document.getElementById('formName');
+                const formUrlInput = document.getElementById('formUrl');
+                const sheetUrlInput = document.getElementById('sheetUrl');
+
+                if (addFormBtn) {
+                    addFormBtn.addEventListener('click', () => {
+                        const name = formNameInput.value.trim();
+                        const url = formUrlInput.value.trim();
+                        const sheetUrl = sheetUrlInput.value.trim();
+                        
+                        try {
+                            const index = this.formManager.addForm(name, url, sheetUrl);
+                            this.updateDashboard();
+                            this.updateFormInfo();
+                            
+                            // Clear inputs
+                            formNameInput.value = '';
+                            formUrlInput.value = '';
+                            sheetUrlInput.value = '';
+                            
+                            this.showNotification(`Form "${name}" added successfully!`, 'success');
+                        } catch (error) {
+                            this.showNotification(error.message, 'error');
+                        }
+                    });
+                }
+
+                // Allow Enter key to add form
+                [formNameInput, formUrlInput, sheetUrlInput].forEach(input => {
+                    if (input) {
+                        input.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') {
+                                addFormBtn.click();
+                            }
+                        });
+                    }
+                });
+            }
+
+            updateDashboard() {
+                this.updateFormsList();
+                this.updateSessionInfo();
+            }
+
+            updateFormsList() {
+                const formsList = document.getElementById('formsList');
+                if (!formsList) return;
+
+                if (this.formManager.forms.length === 0) {
+                    formsList.innerHTML = '<p class="no-forms">No forms added yet. Add your first form above.</p>';
+                    return;
+                }
+
+                formsList.innerHTML = this.formManager.forms.map((form, index) => `
+                    <div class="form-item ${index === this.formManager.currentFormIndex ? 'active' : ''}">
+                        <div class="form-info">
+                            <h4>${form.name}</h4>
+                            <p class="form-url">Form: ${form.url}</p>
+                            ${form.sheetUrl ? `<p class="sheet-url">Sheet: ${form.sheetUrl}</p>` : '<p class="sheet-url no-sheet">No sheet URL provided</p>'}
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-small ${index === this.formManager.currentFormIndex ? 'btn-primary' : 'btn-secondary'}" 
+                                    onclick="window.instructorDashboard.setCurrentForm(${index})">
+                                ${index === this.formManager.currentFormIndex ? 'Active' : 'Set Active'}
+                            </button>
+                            <button class="btn btn-small btn-danger" onclick="window.instructorDashboard.removeForm(${index})">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            setCurrentForm(index) {
+                this.formManager.setCurrentForm(index);
+                this.updateDashboard();
+                this.updateFormInfo();
+                this.generateQRCode();
+                this.showNotification(`Switched to "${this.formManager.getCurrentForm().name}"`, 'success');
+            }
+
+            removeForm(index) {
+                const form = this.formManager.forms[index];
+                if (confirm(`Are you sure you want to remove "${form.name}"?`)) {
+                    this.formManager.removeForm(index);
+                    this.updateDashboard();
+                    this.updateFormInfo();
+                    this.generateQRCode();
+                    this.showNotification(`Form "${form.name}" removed`, 'info');
+                }
             }
 
             updateFormInfo() {
@@ -754,12 +934,12 @@
 
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            const studentQRScanner = new StudentQRScanner();
-            window.studentQRScanner = studentQRScanner;
+            const instructorDashboard = new InstructorDashboard();
+            window.instructorDashboard = instructorDashboard;
             
-            console.log('Student QR Scanner initialized');
-            console.log('Current session ID:', studentQRScanner.getCurrentSessionId());
-            console.log('Attendance URL:', studentQRScanner.getAttendanceUrl());
+            console.log('Instructor Dashboard initialized');
+            console.log('Current session ID:', instructorDashboard.getCurrentSessionId());
+            console.log('Attendance URL:', instructorDashboard.getAttendanceUrl());
         });
     </script>
 </body>
