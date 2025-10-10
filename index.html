@@ -6,6 +6,7 @@
     <title>QR Code Attendance Scanner - Anti-Screenshot</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="api-client.js"></script>
 </head>
 <body>
     <div class="container">
@@ -197,91 +198,7 @@
             }
         }
 
-        // Form Manager
-        class FormManager {
-            constructor() {
-                this.forms = this.loadForms();
-                this.currentFormIndex = 0;
-            }
-
-            loadForms() {
-                const saved = localStorage.getItem('attendanceForms');
-                if (saved) {
-                    return JSON.parse(saved);
-                }
-                // Default form if none exist
-                return [{
-                    name: 'Default Attendance',
-                    url: 'https://docs.google.com/forms/d/e/1FAIpQLSfJQOOhFtkqpmmHIyNf_XE_EHAL9v5JsiPJ7D0cAnHVpagBTA/viewform',
-                    sheetUrl: 'https://docs.google.com/spreadsheets/d/1FAIpQLSfJQOOhFtkqpmmHIyNf_XE_EHAL9v5JsiPJ7D0cAnHVpagBTA/edit'
-                }];
-            }
-
-            saveForms() {
-                localStorage.setItem('attendanceForms', JSON.stringify(this.forms));
-            }
-
-            addForm(name, url, sheetUrl) {
-                if (!name.trim() || !url.trim()) {
-                    throw new Error('Form name and URL are required');
-                }
-                
-                // Validate URLs
-                try {
-                    new URL(url);
-                    if (sheetUrl && sheetUrl.trim()) {
-                        new URL(sheetUrl.trim());
-                    }
-                } catch {
-                    throw new Error('Please enter valid URLs');
-                }
-
-                this.forms.push({ 
-                    name: name.trim(), 
-                    url: url.trim(),
-                    sheetUrl: sheetUrl ? sheetUrl.trim() : ''
-                });
-                this.saveForms();
-                return this.forms.length - 1;
-            }
-
-            removeForm(index) {
-                if (index >= 0 && index < this.forms.length) {
-                    this.forms.splice(index, 1);
-                    this.saveForms();
-                    
-                    // Adjust current index if needed
-                    if (this.currentFormIndex >= this.forms.length) {
-                        this.currentFormIndex = Math.max(0, this.forms.length - 1);
-                    }
-                }
-            }
-
-            getCurrentForm() {
-                if (this.forms.length === 0) return null;
-                return this.forms[this.currentFormIndex];
-            }
-
-            nextForm() {
-                if (this.forms.length > 1) {
-                    this.currentFormIndex = (this.currentFormIndex + 1) % this.forms.length;
-                }
-            }
-
-            previousForm() {
-                if (this.forms.length > 1) {
-                    this.currentFormIndex = this.currentFormIndex === 0 
-                        ? this.forms.length - 1 
-                        : this.currentFormIndex - 1;
-                }
-            }
-
-            setCurrentForm(index) {
-                if (index >= 0 && index < this.forms.length) {
-                    this.currentFormIndex = index;
-                }
-            }
-        }
+        // Form Manager is now imported from api-client.js
 
         // Google Sheets Integration
         class GoogleSheetsIntegration {

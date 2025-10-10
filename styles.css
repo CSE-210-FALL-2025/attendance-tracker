@@ -286,8 +286,13 @@ footer p {
         gap: 15px;
     }
 
+    .form-item .form-info {
+        margin-bottom: 10px;
+    }
+
     .form-actions {
         justify-content: center;
+        align-items: center;
     }
 
     .url-management, .controls-section {
@@ -439,12 +444,13 @@ footer p {
 .form-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     padding: 20px;
     background: rgba(255, 255, 255, 0.8);
     border-radius: 15px;
     border: 2px solid transparent;
     transition: all 0.3s ease;
+    gap: 20px;
 }
 
 .form-item.active {
@@ -456,26 +462,44 @@ footer p {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-.form-info h4 {
-    margin-bottom: 5px;
-    color: #333;
-    font-size: 1.1rem;
+/* Form item specific styles */
+.form-item .form-info {
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    font-size: 1rem;
 }
 
-.form-url {
+.form-item .form-info h4 {
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.form-item .form-info .form-url {
     color: #666;
     font-size: 0.9rem;
     word-break: break-all;
+    margin-bottom: 4px;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
-.sheet-url {
-    color: #28a745;
+.form-item .form-info .sheet-url {
+    color: #333;
     font-size: 0.85rem;
     word-break: break-all;
-    margin-top: 5px;
+    margin-top: 4px;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
-.sheet-url.no-sheet {
+.form-item .form-info .sheet-url.no-sheet {
     color: #dc3545;
     font-style: italic;
 }
@@ -483,7 +507,8 @@ footer p {
 .form-actions {
     display: flex;
     gap: 10px;
-    align-items: center;
+    align-items: flex-start;
+    flex-shrink: 0;
 }
 
 .btn-small {

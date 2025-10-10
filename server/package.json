@@ -1,0 +1,29 @@
+{
+  "name": "cse210-attendance-server",
+  "version": "1.0.0",
+  "description": "Serverless API for CSE 210 Attendance System",
+  "main": "api/forms.js",
+  "scripts": {
+    "dev": "vercel dev --yes",
+    "build": "echo 'No build step required'",
+    "start": "vercel dev --yes"
+  },
+  "keywords": [
+    "vercel",
+    "serverless",
+    "attendance",
+    "api"
+  ],
+  "author": "CSE 210 TA",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}

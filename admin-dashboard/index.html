@@ -6,6 +6,7 @@
     <title>Admin Dashboard - CSE 210 Attendance</title>
     <link rel="stylesheet" href="../styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../api-client.js"></script>
 </head>
 <body>
     <div class="container">
@@ -42,37 +43,32 @@
     </div>
     
     <script>
-        // Form Manager
-        class FormManager {
-            constructor() {
-                this.forms = this.loadForms();
-                this.currentFormIndex = 0;
-            }
-
-            loadForms() {
-                const saved = localStorage.getItem('attendanceForms');
-                if (saved) {
-                    return JSON.parse(saved);
-                }
-                // Default form if none exist
-                return [{
-                    name: 'Default Attendance',
-                    url: 'https://docs.google.com/forms/d/e/1FAIpQLSfJQOOhFtkqpmmHIyNf_XE_EHAL9v5JsiPJ7D0cAnHVpagBTA/viewform',
-                    sheetUrl: 'https://docs.google.com/spreadsheets/d/1FAIpQLSfJQOOhFtkqpmmHIyNf_XE_EHAL9v5JsiPJ7D0cAnHVpagBTA/edit'
-                }];
-            }
-
-            getCurrentForm() {
-                if (this.forms.length === 0) return null;
-                return this.forms[this.currentFormIndex];
-            }
-        }
+        // Form Manager is now imported from api-client.js
 
         // Google Sheets Integration
         class GoogleSheetsIntegration {
             constructor() {
-                this.apiKey = 'AIzaSyDw54LrE6smv3JtilzuwuEC9OLJTsxGcrg'; // Hardcoded API key
+                this.apiKey = null; // Will be loaded from config
                 this.sheetId = null;
+                this.config = null;
+                this.loadConfig();
+            }
+
+            async loadConfig() {
+                try {
+                    const response = await fetch('../config.json');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    this.config = await response.json();
+                    this.apiKey = this.config.googleSheets.apiKey;
+                    console.log('Configuration loaded successfully');
+                } catch (error) {
+                    console.error('Error loading configuration:', error);
+                    // Fallback to hardcoded key if config fails to load
+                    this.apiKey = 'AIzaSyDw54LrE6smv3JtilzuwuEC9OLJTsxGcrg';
+                    console.warn('Using fallback API key');
+                }
             }
 
             extractSheetId(sheetUrl) {
@@ -91,6 +87,15 @@
             }
 
             async fetchSheetData(sheetId, range = 'A:Z') {
+                // Wait for config to load if it hasn't already
+                if (!this.apiKey) {
+                    await this.loadConfig();
+                }
+                
+                if (!this.apiKey) {
+                    throw new Error('Google Sheets API key not available. Please check your configuration.');
+                }
+
                 const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${this.apiKey}`;
                 
                 try {

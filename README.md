@@ -26,24 +26,42 @@ A complete web application for managing attendance using QR codes with both clie
    cd "CSE 210 - TA"
    ```
 
-2. **Install dependencies**
+2. **Configure the application**
+   ```bash
+   # Copy the example configuration file
+   cp config.example.json config.json
+   
+   # Edit config.json and add your Google Sheets API key
+   # Get your API key from: https://console.developers.google.com/
+   ```
+
+3. **Install dependencies** (if using Node.js server)
    ```bash
    npm install
    ```
 
-3. **Start the server**
+4. **Start the application**
+   
+   **Option A: Direct HTML (Recommended)**
    ```bash
-   npm start
+   # Open the main application
+   open index.html
+   
+   # Or open specific dashboards
+   open instructor-dashboard/index.html
+   open admin-dashboard/index.html
    ```
    
-   Or use the startup script:
+   **Option B: Using Node.js server**
    ```bash
-   ./start.sh
+   npm start
+   # Access at http://localhost:3000
    ```
 
-4. **Access the application**
-   - **Main App**: http://localhost:3000
-   - **Admin Panel**: http://localhost:3000/admin
+5. **Access the application**
+   - **Main App**: `index.html` (Student QR Scanner)
+   - **Instructor Dashboard**: `instructor-dashboard/index.html`
+   - **Admin Dashboard**: `admin-dashboard/index.html`
 
 ### Alternative Setup Methods
 
@@ -97,11 +115,59 @@ The server provides several REST API endpoints:
 - `POST /submit-attendance` - Submit attendance data
 - `GET /admin` - Admin panel for viewing attendance
 
+## Configuration
+
+### Google Sheets API Setup
+
+1. **Get a Google Sheets API Key**:
+   - Go to [Google Cloud Console](https://console.developers.google.com/)
+   - Create a new project or select an existing one
+   - Enable the Google Sheets API
+   - Create credentials (API Key)
+   - Copy your API key
+
+2. **Configure the application**:
+   ```bash
+   # Copy the example configuration
+   cp config.example.json config.json
+   
+   # Edit config.json and replace YOUR_GOOGLE_SHEETS_API_KEY_HERE with your actual API key
+   ```
+
+3. **Configure your Google Sheets**:
+   - Make sure your Google Sheets are publicly viewable or shared with the service account
+   - The API key needs read access to your Google Sheets
+
+### Configuration File Structure
+
+The `config.json` file contains:
+```json
+{
+  "googleSheets": {
+    "apiKey": "your_api_key_here"
+  },
+  "app": {
+    "name": "CSE 210 Attendance System",
+    "version": "1.0.0",
+    "qrRefreshInterval": 5000
+  }
+}
+```
+
 ## Customization
 
 ### Changing QR Code Refresh Rate
 
-Edit `public/index.html` and modify the refresh interval:
+Edit `config.json` and modify the refresh interval:
+```json
+{
+  "app": {
+    "qrRefreshInterval": 10000  // Change to 10 seconds
+  }
+}
+```
+
+Or edit the HTML files directly:
 ```javascript
 this.refreshInterval = 5000; // Change from 5 seconds to desired time
 ```

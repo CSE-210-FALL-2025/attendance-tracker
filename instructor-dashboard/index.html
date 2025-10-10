@@ -6,6 +6,7 @@
     <title>Instructor Dashboard - CSE 210 Attendance</title>
     <link rel="stylesheet" href="../styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../api-client.js"></script>
 </head>
 <body>
     <div class="container">
@@ -26,7 +27,7 @@
                         </div>
                         
                         <div class="forms-list">
-                            <h3>Active Forms</h3>
+                            <h3>All Forms</h3>
                             <div id="formsList" class="forms-container">
                                 <p class="no-forms">No forms added yet. Add your first form above.</p>
                             </div>
@@ -222,97 +223,30 @@
             }
         }
 
-        // Form Manager
-        class FormManager {
-            constructor() {
-                this.forms = this.loadForms();
-                this.currentFormIndex = 0;
-            }
-
-            loadForms() {
-                const saved = localStorage.getItem('attendanceForms');
-                if (saved) {
-                    return JSON.parse(saved);
-                }
-                // Default form if none exist
-                return [{
-                    name: 'Default Attendance',
-                    url: 'https://docs.google.com/forms/d/e/1FAIpQLSfJQOOhFtkqpmmHIyNf_XE_EHAL9v5JsiPJ7D0cAnHVpagBTA/viewform',
-                    sheetUrl: 'https://docs.google.com/spreadsheets/d/1FAIpQLSfJQOOhFtkqpmmHIyNf_XE_EHAL9v5JsiPJ7D0cAnHVpagBTA/edit'
-                }];
-            }
-
-            saveForms() {
-                localStorage.setItem('attendanceForms', JSON.stringify(this.forms));
-            }
-
-            addForm(name, url, sheetUrl) {
-                if (!name.trim() || !url.trim()) {
-                    throw new Error('Form name and URL are required');
-                }
-                
-                // Validate URLs
-                try {
-                    new URL(url);
-                    if (sheetUrl && sheetUrl.trim()) {
-                        new URL(sheetUrl.trim());
-                    }
-                } catch {
-                    throw new Error('Please enter valid URLs');
-                }
-
-                this.forms.push({ 
-                    name: name.trim(), 
-                    url: url.trim(),
-                    sheetUrl: sheetUrl ? sheetUrl.trim() : ''
-                });
-                this.saveForms();
-                return this.forms.length - 1;
-            }
-
-            removeForm(index) {
-                if (index >= 0 && index < this.forms.length) {
-                    this.forms.splice(index, 1);
-                    this.saveForms();
-                    
-                    // Adjust current index if needed
-                    if (this.currentFormIndex >= this.forms.length) {
-                        this.currentFormIndex = Math.max(0, this.forms.length - 1);
-                    }
-                }
-            }
-
-            getCurrentForm() {
-                if (this.forms.length === 0) return null;
-                return this.forms[this.currentFormIndex];
-            }
-
-            nextForm() {
-                if (this.forms.length > 1) {
-                    this.currentFormIndex = (this.currentFormIndex + 1) % this.forms.length;
-                }
-            }
-
-            previousForm() {
-                if (this.forms.length > 1) {
-                    this.currentFormIndex = this.currentFormIndex === 0 
-                        ? this.forms.length - 1 
-                        : this.currentFormIndex - 1;
-                }
-            }
-
-            setCurrentForm(index) {
-                if (index >= 0 && index < this.forms.length) {
-                    this.currentFormIndex = index;
-                }
-            }
-        }
+        // Form Manager is now imported from api-client.js
 
         // Google Sheets Integration
         class GoogleSheetsIntegration {
             constructor() {
-                this.apiKey = null; // Will be set by user
+                this.apiKey = null; // Will be loaded from config
                 this.sheetId = null; // Will be extracted from form URL
+                this.config = null;
+                this.loadConfig();
+            }
+
+            async loadConfig() {
+                try {
+                    const response = await fetch('../config.json');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    this.config = await response.json();
+                    this.apiKey = this.config.googleSheets.apiKey;
+                    console.log('Configuration loaded successfully');
+                } catch (error) {
+                    console.error('Error loading configuration:', error);
+                    console.warn('API key not available. Please configure the system properly.');
+                }
             }
 
             extractSheetId(sheetUrl) {
@@ -333,8 +267,13 @@
             }
 
             async fetchSheetData(sheetId, range = 'A:Z') {
+                // Wait for config to load if it hasn't already
                 if (!this.apiKey) {
-                    throw new Error('Google Sheets API key not configured. Please add your API key in the settings.');
+                    await this.loadConfig();
+                }
+                
+                if (!this.apiKey) {
+                    throw new Error('Google Sheets API key not configured. Please check your config.json file.');
                 }
 
                 const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${this.apiKey}`;
@@ -621,6 +560,10 @@
                 this.generateNewSession();
                 this.setupEventListeners();
                 this.startQRRefreshCycle();
+                // Load forms and update dashboard
+                this.formManager.init().then(() => {
+                    this.updateDashboard();
+                });
                 this.updateFormInfo();
             }
 
@@ -795,13 +738,17 @@
                 const sheetUrlInput = document.getElementById('sheetUrl');
 
                 if (addFormBtn) {
-                    addFormBtn.addEventListener('click', () => {
+                    addFormBtn.addEventListener('click', async () => {
                         const name = formNameInput.value.trim();
                         const url = formUrlInput.value.trim();
                         const sheetUrl = sheetUrlInput.value.trim();
                         
                         try {
-                            const index = this.formManager.addForm(name, url, sheetUrl);
+                            // Show loading state
+                            addFormBtn.textContent = 'Adding...';
+                            addFormBtn.disabled = true;
+                            
+                            await this.formManager.addForm(name, url, sheetUrl);
                             this.updateDashboard();
                             this.updateFormInfo();
                             
@@ -813,6 +760,10 @@
                             this.showNotification(`Form "${name}" added successfully!`, 'success');
                         } catch (error) {
                             this.showNotification(error.message, 'error');
+                        } finally {
+                            // Reset button state
+                            addFormBtn.textContent = 'Add Form';
+                            addFormBtn.disabled = false;
                         }
                     });
                 }
@@ -837,6 +788,7 @@
             updateFormsList() {
                 const formsList = document.getElementById('formsList');
                 if (!formsList) return;
+
 
                 if (this.formManager.forms.length === 0) {
                     formsList.innerHTML = '<p class="no-forms">No forms added yet. Add your first form above.</p>';
@@ -863,22 +815,32 @@
                 `).join('');
             }
 
-            setCurrentForm(index) {
-                this.formManager.setCurrentForm(index);
-                this.updateDashboard();
-                this.updateFormInfo();
-                this.generateQRCode();
-                this.showNotification(`Switched to "${this.formManager.getCurrentForm().name}"`, 'success');
-            }
-
-            removeForm(index) {
-                const form = this.formManager.forms[index];
-                if (confirm(`Are you sure you want to remove "${form.name}"?`)) {
-                    this.formManager.removeForm(index);
+            async setCurrentForm(index) {
+                try {
+                    await this.formManager.setCurrentForm(index);
                     this.updateDashboard();
                     this.updateFormInfo();
                     this.generateQRCode();
-                    this.showNotification(`Form "${form.name}" removed`, 'info');
+                    this.showNotification(`Switched to "${this.formManager.getCurrentForm().name}"`, 'success');
+                } catch (error) {
+                    console.error('Failed to set current form:', error);
+                    this.showNotification('Failed to set active form: ' + error.message, 'error');
+                }
+            }
+
+            async removeForm(index) {
+                const form = this.formManager.forms[index];
+                if (confirm(`Are you sure you want to remove "${form.name}"?`)) {
+                    try {
+                        await this.formManager.removeForm(index);
+                        this.updateDashboard();
+                        this.updateFormInfo();
+                        this.generateQRCode();
+                        this.showNotification(`Form "${form.name}" removed`, 'info');
+                    } catch (error) {
+                        console.error('Failed to remove form:', error);
+                        this.showNotification('Failed to remove form: ' + error.message, 'error');
+                    }
                 }
             }
 
