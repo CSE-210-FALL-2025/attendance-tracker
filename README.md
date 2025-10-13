@@ -16,68 +16,92 @@ A complete web application for managing attendance using QR codes with both clie
 ## Quick Start
 
 ### Prerequisites
-- Node.js (v14 or higher)
+
+- Node.js (v18 or higher)
 - npm (comes with Node.js)
+- Vercel CLI (for deployment): `npm install -g vercel`
 
 ### Installation & Setup
 
+#### Option 1: Deploy to Vercel (Recommended)
+
 1. **Clone or download this repository**
+
    ```bash
-   cd "CSE 210 - TA"
+   git clone <your-repo-url>
+   cd attendance-tracker
    ```
 
-2. **Configure the application**
-   ```bash
-   # Copy the example configuration file
-   cp config.example.json config.json
-   
-   # Edit config.json and add your Google Sheets API key
-   # Get your API key from: https://console.developers.google.com/
-   ```
+2. **Install dependencies**
 
-3. **Install dependencies** (if using Node.js server)
    ```bash
    npm install
    ```
 
-4. **Start the application**
-   
-   **Option A: Direct HTML (Recommended)**
+3. **Deploy to Vercel**
+
    ```bash
-   # Open the main application
-   open index.html
-   
-   # Or open specific dashboards
-   open instructor-dashboard/index.html
-   open admin-dashboard/index.html
+   # Login to Vercel
+   vercel login
+
+   # Deploy
+   vercel
+
+   # Deploy to production
+   vercel --prod
    ```
-   
-   **Option B: Using Node.js server**
+
+4. **Access your deployed application**
+   - Your app will be available at `https://your-app-name.vercel.app`
+   - **Main App**: `/` (Student QR Scanner)
+   - **Instructor Dashboard**: `/instructor-dashboard/`
+   - **Admin Dashboard**: `/admin-dashboard/`
+
+#### Option 2: Local Development
+
+1. **Clone or download this repository**
+
    ```bash
-   npm start
+   git clone <your-repo-url>
+   cd attendance-tracker
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Start local development server**
+
+   ```bash
+   vercel dev
    # Access at http://localhost:3000
    ```
 
-5. **Access the application**
-   - **Main App**: `index.html` (Student QR Scanner)
-   - **Instructor Dashboard**: `instructor-dashboard/index.html`
-   - **Admin Dashboard**: `admin-dashboard/index.html`
+4. **Access the application**
+   - **Main App**: `http://localhost:3000` (Student QR Scanner)
+   - **Instructor Dashboard**: `http://localhost:3000/instructor-dashboard/`
+   - **Admin Dashboard**: `http://localhost:3000/admin-dashboard/`
 
 ### Alternative Setup Methods
 
 #### Option A: Using the Startup Script
+
 ```bash
 chmod +x start.sh
 ./start.sh
 ```
 
 #### Option B: Manual Start
+
 ```bash
 npm install
 npm start
 ```
 
 #### Option C: Development Mode (with auto-restart)
+
 ```bash
 npm install
 npm run dev
@@ -86,18 +110,21 @@ npm run dev
 ## How It Works
 
 ### For Instructors:
+
 1. **Start Session**: Open the main app and create a new session
 2. **Display QR Code**: Show the QR code on a screen/projector
 3. **Monitor**: QR codes automatically refresh every 5 seconds
 4. **View Results**: Check the admin panel to see attendance records
 
 ### For Students:
+
 1. **Scan QR Code**: Use phone camera to scan the displayed QR code
 2. **Fill Form**: Complete the attendance form with name, student ID, and email
 3. **Submit**: Confirm attendance submission
 4. **Done**: Receive confirmation and close the page
 
 ### Security Features:
+
 - **Time-limited QR codes**: Each QR code expires after 5 seconds
 - **Single-use tokens**: Each QR code can only be used once
 - **Session isolation**: Each session has unique, non-reusable identifiers
@@ -120,6 +147,7 @@ The server provides several REST API endpoints:
 ### Google Sheets API Setup
 
 1. **Get a Google Sheets API Key**:
+
    - Go to [Google Cloud Console](https://console.developers.google.com/)
    - Create a new project or select an existing one
    - Enable the Google Sheets API
@@ -127,10 +155,11 @@ The server provides several REST API endpoints:
    - Copy your API key
 
 2. **Configure the application**:
+
    ```bash
    # Copy the example configuration
    cp config.example.json config.json
-   
+
    # Edit config.json and replace YOUR_GOOGLE_SHEETS_API_KEY_HERE with your actual API key
    ```
 
@@ -141,6 +170,7 @@ The server provides several REST API endpoints:
 ### Configuration File Structure
 
 The `config.json` file contains:
+
 ```json
 {
   "googleSheets": {
@@ -159,15 +189,17 @@ The `config.json` file contains:
 ### Changing QR Code Refresh Rate
 
 Edit `config.json` and modify the refresh interval:
+
 ```json
 {
   "app": {
-    "qrRefreshInterval": 10000  // Change to 10 seconds
+    "qrRefreshInterval": 10000 // Change to 10 seconds
   }
 }
 ```
 
 Or edit the HTML files directly:
+
 ```javascript
 this.refreshInterval = 5000; // Change from 5 seconds to desired time
 ```
@@ -175,6 +207,7 @@ this.refreshInterval = 5000; // Change from 5 seconds to desired time
 ### Modifying Session Duration
 
 Edit `server.js` and change the nonce TTL:
+
 ```javascript
 function generateNonceForSession(sessionId, ttlMs = 5000) {
   // Change 5000 to desired milliseconds
@@ -188,6 +221,7 @@ Modify `styles.css` to change colors, fonts, or layout. The app uses a modern gl
 ### Database Integration
 
 Currently, the app uses in-memory storage. To persist data, you can:
+
 1. Replace the Map objects with a database (MongoDB, PostgreSQL, etc.)
 2. Add database connection logic in `server.js`
 3. Update the session and attendance storage functions
@@ -207,12 +241,14 @@ Currently, the app uses in-memory storage. To persist data, you can:
 ## Dependencies
 
 ### Server Dependencies:
+
 - **express**: Web server framework
 - **cors**: Cross-origin resource sharing
 - **uuid**: Unique identifier generation
 - **body-parser**: Request body parsing
 
 ### Client Dependencies:
+
 - **QRCode.js**: QR code generation (loaded via CDN)
 
 ## Browser Compatibility
@@ -226,40 +262,74 @@ Currently, the app uses in-memory storage. To persist data, you can:
 ## Troubleshooting
 
 ### Server Won't Start
+
 - Ensure Node.js is installed (`node --version`)
 - Check if port 3000 is available
 - Verify all dependencies are installed (`npm install`)
 
 ### QR Code Not Generating
+
 - Check browser console for errors
 - Ensure QRCode library is loading from CDN
 - Verify server is running and accessible
 
 ### Students Can't Access Attendance Form
+
 - Check that the server is accessible from student devices
 - Verify the QR code contains the correct URL
 - Ensure students are on the same network (for local development)
 
 ### Mobile Scanning Issues
+
 - Ensure good lighting conditions
 - Hold phone steady and at appropriate distance
 - Try different angles if QR code doesn't scan
 - Use phone's built-in camera app for best results
 
 ### Attendance Not Recording
+
 - Check server console for error messages
 - Verify all form fields are filled correctly
 - Ensure the QR code hasn't expired (5-second limit)
 
+## Deployment
+
+### Vercel Deployment (Recommended)
+
+This application is optimized for deployment on Vercel. See [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) for detailed instructions.
+
+**Quick Deploy:**
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Login and deploy
+vercel login
+vercel
+vercel --prod
+```
+
+### Other Deployment Options
+
+- **Netlify**: Can be deployed as static site with serverless functions
+- **Railway**: Can deploy the Express app directly
+- **Heroku**: Traditional hosting with buildpacks
+
 ## Development
 
 ### Running in Development Mode
+
 ```bash
+# Using Vercel CLI (recommended)
+vercel dev
+
+# Or using npm scripts
 npm run dev
 ```
-This uses nodemon to automatically restart the server when files change.
 
 ### Environment Variables
+
 - `PORT`: Server port (default: 3000)
 - Set with: `PORT=8080 npm start`
 
