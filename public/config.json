@@ -1,0 +1,10 @@
+{
+  "googleSheets": {
+    "apiKey": "AIzaSyDw54LrE6smv3JtilzuwuEC9OLJTsxGcrg"
+  },
+  "app": {
+    "name": "CSE 210 Attendance System",
+    "version": "1.0.0",
+    "qrRefreshInterval": 5000
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "attendance-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo 'No build step required for serverless functions'",
+    "start": "echo 'Use vercel dev for local development'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}

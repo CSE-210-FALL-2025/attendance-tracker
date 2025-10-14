@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "routes": [
+    { "src": "/api/forms", "dest": "/api/forms.js" },
+    { "src": "/api/pages", "dest": "/api/pages.js" },
+    { "src": "/api/assets", "dest": "/api/assets.js" },
+    {
+      "src": "/instructor-dashboard/?(.*)",
+      "dest": "/api/pages?page=instructor"
+    },
+    {
+      "src": "/admin-dashboard/?(.*)",
+      "dest": "/api/pages?page=admin"
+    },
+    { "src": "/", "dest": "/api/pages?page=student" }
+  ]
+}

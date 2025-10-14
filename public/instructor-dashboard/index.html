@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instructor Dashboard - CSE 210 Attendance</title>
+    <link rel="stylesheet" href="/api/assets?asset=styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/api/assets?asset=api-client.js"></script>
+    <script src="/api/assets?asset=instructor.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="view active">
+        <main>
+          <div class="dashboard-container">
+            <div class="url-management">
+              <h2>Manage Google Form URLs</h2>
+              <div class="url-input-section">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    id="formName"
+                    placeholder="Form Name (e.g., Lecture 1, Quiz 2)"
+                    class="form-input"
+                  />
+                  <input
+                    type="url"
+                    id="formUrl"
+                    placeholder="Google Form URL"
+                    class="form-input"
+                  />
+                  <input
+                    type="url"
+                    id="sheetUrl"
+                    placeholder="Google Sheet URL (for responses)"
+                    class="form-input"
+                  />
+                  <button id="addFormBtn" class="btn btn-primary">
+                    Add Form
+                  </button>
+                </div>
+              </div>
+              <div class="forms-list">
+                <h3>All Forms</h3>
+                <div id="formsList" class="forms-container">
+                  <p class="no-forms">
+                    No forms added yet. Add your first form above.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="controls-section">
+              <h2>Student View Controls</h2>
+              <div class="controls">
+                <button id="newSessionBtn" class="btn btn-primary">
+                  New Session
+                </button>
+                <button id="refreshBtn" class="btn btn-secondary">
+                  Refresh QR
+                </button>
+                <button id="toggleAutoRefresh" class="btn btn-secondary">
+                  Auto Refresh: ON
+                </button>
+              </div>
+              <div class="session-info">
+                <p>
+                  <strong>Current Session:</strong>
+                  <span id="currentSessionId">Loading...</span>
+                </p>
+                <p>
+                  <strong>Auto Refresh:</strong>
+                  <span id="autoRefreshStatus">Every 5 seconds</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

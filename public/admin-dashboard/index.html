@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - CSE 210 Attendance</title>
+    <link rel="stylesheet" href="/api/assets?asset=styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/api/assets?asset=api-client.js"></script>
+    <script src="/api/assets?asset=admin.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="view active">
+        <main>
+          <div class="dashboard-container">
+            <div class="results-section">
+              <h2>Attendance Results</h2>
+              <div class="results-controls">
+                <button id="showResultsBtn" class="btn btn-primary">
+                  Show Results
+                </button>
+                <button id="refreshResultsBtn" class="btn btn-secondary">
+                  Refresh Data
+                </button>
+              </div>
+              <div
+                id="resultsContainer"
+                class="results-container"
+                style="display: none"
+              >
+                <div class="results-header">
+                  <h3>Attendance Statistics</h3>
+                  <button
+                    id="closeResultsBtn"
+                    class="btn btn-small btn-secondary"
+                  >
+                    Close
+                  </button>
+                </div>
+                <div id="chartContainer" class="chart-container">
+                  <div id="totalCountDisplay" class="total-count-display">
+                    <h3>Total Responses</h3>
+                    <div class="count-number">0</div>
+                  </div>
+                </div>
+                <div id="resultsData" class="results-data"></div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
