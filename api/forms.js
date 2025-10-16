@@ -1,23 +1,37 @@
 import fs from "fs";
 import path from "path";
 
-const dbPath = path.join(process.cwd(), "db.json");
+// Use /tmp directory for serverless environments like Vercel
+const dbPath = path.join("/tmp", "db.json");
 
 function readDatabase() {
   try {
     const data = fs.readFileSync(dbPath, "utf8");
     return JSON.parse(data);
   } catch (_err) {
-    return {
-      forms: [],
-      settings: {
-        currentFormIndex: 0,
-        qrRefreshInterval: 5000,
-        autoRefreshEnabled: true,
-      },
-      sessions: [],
-      attendance: [],
-    };
+    // If /tmp/db.json doesn't exist, try to read from the original db.json
+    // and copy it to /tmp for future operations
+    try {
+      const originalDbPath = path.join(process.cwd(), "db.json");
+      const originalData = fs.readFileSync(originalDbPath, "utf8");
+      const db = JSON.parse(originalData);
+
+      // Copy to /tmp for future writes
+      writeDatabase(db);
+      return db;
+    } catch (_originalErr) {
+      // If original db.json doesn't exist either, return default structure
+      return {
+        forms: [],
+        settings: {
+          currentFormIndex: 0,
+          qrRefreshInterval: 5000,
+          autoRefreshEnabled: true,
+        },
+        sessions: [],
+        attendance: [],
+      };
+    }
   }
 }
 

@@ -26,18 +26,13 @@ export default function handler(req, res) {
 
     switch (page) {
       case "admin":
-        filePath = path.join(
-          process.cwd(),
-          "public",
-          "admin-dashboard",
-          "index.html"
-        );
+        filePath = path.join(process.cwd(), "public", "admin", "index.html");
         break;
       case "instructor":
         filePath = path.join(
           process.cwd(),
           "public",
-          "instructor-dashboard",
+          "instructor",
           "index.html"
         );
         break;

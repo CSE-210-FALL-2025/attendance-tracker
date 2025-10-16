@@ -4,13 +4,14 @@
     { "src": "/api/forms", "dest": "/api/forms.js" },
     { "src": "/api/pages", "dest": "/api/pages.js" },
     { "src": "/api/assets", "dest": "/api/assets.js" },
+    { "src": "/api/config", "dest": "/api/config.js" },
     {
-      "src": "/instructor-dashboard/?(.*)",
-      "dest": "/api/pages?page=instructor"
+      "src": "/admin/?(.*)",
+      "dest": "/api/pages?page=admin"
     },
     {
-      "src": "/admin-dashboard/?(.*)",
-      "dest": "/api/pages?page=admin"
+      "src": "/instructor/?(.*)",
+      "dest": "/api/pages?page=instructor"
     },
     { "src": "/", "dest": "/api/pages?page=student" }
   ]
