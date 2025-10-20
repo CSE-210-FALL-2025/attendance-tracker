@@ -5,6 +5,7 @@
     { "src": "/api/pages", "dest": "/api/pages.js" },
     { "src": "/api/assets", "dest": "/api/assets.js" },
     { "src": "/api/config", "dest": "/api/config.js" },
+    { "src": "/api/sheets", "dest": "/api/sheets.js" },
     {
       "src": "/admin/?(.*)",
       "dest": "/api/pages?page=admin"
