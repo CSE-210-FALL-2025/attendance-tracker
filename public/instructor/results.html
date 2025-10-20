@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Response Results - CSE 210 Attendance</title>
+    <link rel="stylesheet" href="/api/assets?asset=styles.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="/api/assets?asset=api-client.js"></script>
+    <script src="/api/assets?asset=instructor.js" defer></script>
+    <style>
+      .results-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      
+      .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .results-header h1 {
+        color: white;
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+      }
+      
+      .btn-back {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      }
+      
+      .btn-back:hover {
+        background: linear-gradient(135deg, #5a6fd8, #6a4190);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+      
+      .btn-refresh {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+      }
+      
+      .btn-refresh:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+      }
+      
+      .btn-refresh:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+      
+      .btn-sheet-url {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        margin-top: 10px;
+      }
+      
+      .btn-sheet-url:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+      }
+      
+      .sheet-info {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .sheet-info h3 {
+        color: #333;
+        margin: 0 0 15px 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      
+      .sheet-info .timestamp {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+      }
+      
+      .total-responses {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      }
+      
+      .questions-container {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+      }
+      
+      .question-item {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .question-title {
+        color: #333;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #667eea;
+      }
+      
+      .question-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .chart-section {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      
+      .chart-title {
+        color: #555;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+      
+      .chart-bars {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      
+      .bar-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+      
+      .bar {
+        height: 40px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 15px;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+        min-width: 60px;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .bar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+      }
+      
+      .bar:hover::before {
+        left: 100%;
+      }
+      
+      .bar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      }
+      
+      .bar:nth-child(1) {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      }
+      
+      .bar:nth-child(2) {
+        background: linear-gradient(135deg, #8b5cf6, #a855f7);
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+      }
+      
+      .bar:nth-child(3) {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+      }
+      
+      .bar:nth-child(4) {
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+      }
+      
+      .bar:nth-child(5) {
+        background: linear-gradient(135deg, #5b21b6, #4c1d95);
+        box-shadow: 0 2px 8px rgba(91, 33, 182, 0.3);
+      }
+      
+      .bar:nth-child(6) {
+        background: linear-gradient(135deg, #9333ea, #7e22ce);
+        box-shadow: 0 2px 8px rgba(147, 51, 234, 0.3);
+      }
+      
+      .bar:nth-child(7) {
+        background: linear-gradient(135deg, #c084fc, #a855f7);
+        box-shadow: 0 2px 8px rgba(192, 132, 252, 0.3);
+      }
+      
+      .bar:nth-child(8) {
+        background: linear-gradient(135deg, #e879f9, #d946ef);
+        box-shadow: 0 2px 8px rgba(232, 121, 249, 0.3);
+      }
+      
+      .bar-label {
+        font-size: 0.9rem;
+        flex: 1;
+        color: white;
+        font-weight: 600;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+      
+      .bar-value {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-left: 10px;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+      
+      .responses-summary {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #667eea;
+      }
+      
+      .responses-summary h4 {
+        color: #333;
+        margin: 0 0 15px 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+      
+      .response-breakdown {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .response-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-left: 3px solid #667eea;
+        transition: all 0.3s ease;
+      }
+      
+      .response-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      
+      .option-name {
+        color: #333;
+        font-weight: 500;
+        flex: 1;
+      }
+      
+      .option-count {
+        color: #667eea;
+        font-weight: 700;
+        font-size: 1.1rem;
+        background: rgba(102, 126, 234, 0.1);
+        padding: 4px 12px;
+        border-radius: 15px;
+      }
+      
+      .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        color: white;
+        text-align: center;
+      }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+      
+      @media (max-width: 768px) {
+        .results-container {
+          padding: 15px;
+        }
+        
+        .results-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 15px;
+        }
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="results-container">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading response results...</p>
+      </div>
+    </div>
+
+    <script>
+      // Global refresh function for the results page
+      window.refreshData = async function() {
+        console.log('Global refreshData called');
+        
+        try {
+          // Get the current sheet data
+          const currentData = window.currentSheetData;
+          if (!currentData) {
+            throw new Error('No sheet data available for refresh');
+          }
+          
+          console.log('Current sheet data:', currentData);
+          
+          // Get the instructor dashboard instance
+          const dashboard = window.instructorDashboard;
+          if (!dashboard) {
+            throw new Error('Instructor dashboard not available');
+          }
+          
+          // Extract sheet ID from the stored sheet URL
+          const sheetId = dashboard.extractSheetId(currentData.sheetUrl);
+          console.log('Extracted sheet ID:', sheetId);
+          
+          // Get fresh API key
+          const apiKey = await dashboard.getApiKey();
+          console.log('API key status:', apiKey ? 'Available' : 'Not available');
+          
+          if (!apiKey) {
+            throw new Error('Google Sheets API key not available');
+          }
+          
+          // Construct the API URL
+          const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A:Z?key=${apiKey}`;
+          console.log('API URL:', apiUrl);
+          
+          // Fetch fresh data
+          const response = await fetch(apiUrl);
+          console.log('API response status:', response.status);
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API error response:', errorText);
+            throw new Error(`API request failed: ${response.status} - ${errorText}`);
+          }
+          
+          const data = await response.json();
+          console.log('Raw API response:', data);
+          
+          if (!data.values || data.values.length === 0) {
+            throw new Error('No data found in the sheet');
+          }
+          
+          // Parse the fresh data
+          const freshAttendanceData = dashboard.parseAttendanceData(data.values);
+          console.log('Parsed fresh data:', freshAttendanceData);
+          
+          // Update the page content
+          dashboard.updatePageContent(freshAttendanceData, currentData.sheetName, currentData.sheetUrl);
+          
+          // Show success notification
+          dashboard.showNotification('Data refreshed successfully!', 'success');
+          
+        } catch (error) {
+          console.error('Refresh failed:', error);
+          // Try to show notification using dashboard instance
+          if (window.instructorDashboard) {
+            window.instructorDashboard.showNotification(`Refresh failed: ${error.message}`, 'error');
+          } else {
+            alert(`Refresh failed: ${error.message}`);
+          }
+        }
+      };
+
+      // Global event listener for refresh button
+      document.addEventListener('click', function(event) {
+        console.log('Click detected on:', event.target);
+        if (event.target && event.target.id === 'refreshDataBtn') {
+          console.log('Refresh button clicked!');
+          if (window.refreshData) {
+            window.refreshData();
+          } else {
+            console.error('refreshData function not found in global scope');
+          }
+        }
+      });
+
+      // Function to display results on the page
+      function displayResults(attendanceData, sheetName, sheetUrl) {
+        const container = document.querySelector('.results-container');
+        container.innerHTML = `
+          <div class="results-header">
+            <button class="btn btn-back" onclick="window.location.href='/instructor'">
+              <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+            <h1>Response Results</h1>
+            <button class="btn btn-refresh" id="refreshDataBtn">
+              <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+          </div>
+          
+          <div class="sheet-info">
+            <h3>${sheetName}</h3>
+            <div class="sheet-url-section">
+              <p class="timestamp">Last Updated: ${new Date().toLocaleString()}</p>
+              <button class="btn btn-sheet-url" onclick="window.open('${sheetUrl}', '_blank')">
+                <i class="fas fa-external-link-alt"></i> View Response Sheet
+              </button>
+            </div>
+          </div>
+          
+          <div class="total-responses">
+            Total Responses: ${attendanceData.totalResponses}
+          </div>
+          
+          <div class="questions-container">
+            ${attendanceData.questions.map(question => `
+              <div class="question-item">
+                <h3 class="question-title">${question.title}</h3>
+                <div class="question-content">
+                  <div class="chart-section">
+                    <div class="chart-bars">
+                      ${question.responses.map(response => {
+                        const maxCount = Math.max(...question.responses.map(r => r.count));
+                        const width = (response.count / maxCount) * 100;
+                        return `
+                          <div class="bar-container">
+                            <div class="bar" style="width: ${width}%">
+                              <span class="bar-label">${response.option}</span>
+                              <span class="bar-value">${response.count}</span>
+                            </div>
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                  
+                  <div class="responses-summary">
+                    <h4>Response Summary</h4>
+                    <div class="response-breakdown">
+                      ${question.responses.map(response => `
+                        <div class="response-item">
+                          <span class="option-name">${response.option}</span>
+                          <span class="option-count">${response.count}</span>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        
+        // Update the stored data
+        window.currentSheetData.attendanceData = attendanceData;
+      }
+
+      // Load results when page loads
+      document.addEventListener('DOMContentLoaded', async function() {
+        try {
+          // Get URL parameters
+          const urlParams = new URLSearchParams(window.location.search);
+          const sheetUrl = urlParams.get('sheetUrl');
+          const sheetName = urlParams.get('sheetName');
+          
+          if (!sheetUrl || !sheetName) {
+            throw new Error('Missing required parameters: sheetUrl and sheetName');
+          }
+          
+          // Store sheet data globally for refresh functionality
+          window.currentSheetData = {
+            sheetUrl: decodeURIComponent(sheetUrl),
+            sheetName: decodeURIComponent(sheetName),
+            attendanceData: null
+          };
+          
+          // Initialize dashboard
+          const dashboard = new InstructorDashboard();
+          window.instructorDashboard = dashboard;
+          
+          // Fetch and display results directly
+          const sheetId = dashboard.extractSheetId(window.currentSheetData.sheetUrl);
+          const rawData = await dashboard.sheetsIntegration.fetchSheetData(sheetId);
+          const attendanceData = dashboard.sheetsIntegration.parseAttendanceData(rawData);
+          
+          // Display the results
+          displayResults(attendanceData, window.currentSheetData.sheetName, window.currentSheetData.sheetUrl);
+          
+        } catch (error) {
+          console.error('Error loading results:', error);
+          document.querySelector('.results-container').innerHTML = `
+            <div class="sheet-info">
+              <h3>Error Loading Results</h3>
+              <p>${error.message}</p>
+              <button class="btn btn-back" onclick="window.location.href='/instructor'">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+              </button>
+            </div>
+          `;
+        }
+      });
+    </script>
+  </body>
+</html>

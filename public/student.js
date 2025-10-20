@@ -158,7 +158,7 @@ class ChartManager {
 class StudentQRScanner {
   constructor() {
     this.currentSessionId = null;
-    this.formManager = new FormManager();
+    this.formManager = new FormManager('student'); // Use student mode - only load current form
     this.qrGenerator = new AntiScreenshotQRGenerator();
     this.patternId = 0;
     this.autoRefreshEnabled = true;

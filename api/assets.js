@@ -78,7 +78,16 @@ export default function handler(req, res) {
     }
 
     res.setHeader("Content-Type", contentType);
-    res.setHeader("Cache-Control", "public, max-age=3600"); // Cache for 1 hour
+    
+    // Disable caching for JavaScript files to ensure updates are reflected immediately
+    if (ext === ".js") {
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+    } else {
+      res.setHeader("Cache-Control", "public, max-age=3600"); // Cache for 1 hour
+    }
+    
     res.status(200).send(fileContent);
   } catch (error) {
     console.error("Error serving asset:", error);

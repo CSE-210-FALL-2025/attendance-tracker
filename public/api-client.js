@@ -31,9 +31,14 @@ class APIClient {
     }
   }
 
-  // Get all forms
+  // Get all forms (for admin dashboard)
   async getForms() {
     return await this.request("/forms");
+  }
+
+  // Get only the current active form (for student view)
+  async getCurrentForm() {
+    return await this.request("/current-form");
   }
 
   // Add a new form
@@ -93,15 +98,43 @@ class APIClient {
 
 // Form Manager that uses the API client
 class FormManager {
-  constructor() {
+  constructor(loadMode = 'admin') {
     this.api = new APIClient();
     this.forms = [];
     this.currentFormIndex = 0;
+    this.loadMode = loadMode; // 'admin' or 'student'
     // Don't call init() here - let the caller handle it
   }
 
   async init() {
-    await this.loadForms();
+    if (this.loadMode === 'student') {
+      await this.loadCurrentForm();
+    } else {
+      await this.loadForms();
+    }
+  }
+
+  async loadCurrentForm() {
+    try {
+      const response = await this.api.getCurrentForm();
+      this.forms = response.form ? [response.form] : [];
+      this.currentFormIndex = 0;
+    } catch (error) {
+      console.error("Failed to load current form:", error);
+      // Fallback to default form
+      this.forms = [
+        {
+          id: 1,
+          name: "Default Attendance",
+          url: "https://docs.google.com/forms/d/e/1FAIpQLSfJQOOhFtkqpmmHIyNf_XE_EHAL9v5JsiPJ7D0cAnHVpagBTA/viewform",
+          sheetUrl:
+            "https://docs.google.com/spreadsheets/d/1FAIpQLSfJQOOhFtkqpmmHIyNf_XE_EHAL9v5JsiPJ7D0cAnHVpagBTA/edit",
+          createdAt: new Date().toISOString(),
+          isActive: true,
+        },
+      ];
+      this.currentFormIndex = 0;
+    }
   }
 
   async loadForms() {

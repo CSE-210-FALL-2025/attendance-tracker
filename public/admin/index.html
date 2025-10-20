@@ -43,10 +43,16 @@
               </div>
               <div class="forms-list">
                 <h3>All Forms</h3>
-                <div id="formsList" class="forms-container">
-                  <p class="no-forms">
-                    No forms added yet. Add your first form above.
-                  </p>
+                <div id="formsList" class="sheets-grid">
+                  <div id="formsLoading" class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading forms from database...</p>
+                  </div>
+                  <div class="empty-state" style="display: none;">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No Forms Added</h3>
+                    <p>No forms added yet. Add your first form above.</p>
+                  </div>
                 </div>
               </div>
             </div>

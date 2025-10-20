@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Instructor Dashboard - CSE 210 Attendance</title>
     <link rel="stylesheet" href="/api/assets?asset=styles.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/api/assets?asset=api-client.js"></script>
     <script src="/api/assets?asset=instructor.js" defer></script>
@@ -13,38 +14,21 @@
     <div class="container">
       <div class="view active">
         <main>
-          <div class="dashboard-container">
-            <div class="results-section">
-              <h2>Attendance Results</h2>
-              <div class="results-controls">
-                <button id="showResultsBtn" class="btn btn-primary">
-                  Show Results
-                </button>
-                <button id="refreshResultsBtn" class="btn btn-secondary">
-                  Refresh Data
+          <!-- Form Submission Response Data Section -->
+          <div class="sheets-section">
+            <div class="section-header">
+              <h2><i class="fas fa-table"></i> Form Submission Response Data</h2>
+              <div class="section-actions">
+                <button class="btn btn-refresh" id="refreshSheetsBtn">
+                  <i class="fas fa-sync-alt"></i> Refresh
                 </button>
               </div>
-              <div
-                id="resultsContainer"
-                class="results-container"
-                style="display: none"
-              >
-                <div class="results-header">
-                  <h3>Attendance Statistics</h3>
-                  <button
-                    id="closeResultsBtn"
-                    class="btn btn-small btn-secondary"
-                  >
-                    Close
-                  </button>
-                </div>
-                <div id="chartContainer" class="chart-container">
-                  <div id="totalCountDisplay" class="total-count-display">
-                    <h3>Total Responses</h3>
-                    <div class="count-number">0</div>
-                  </div>
-                </div>
-                <div id="resultsData" class="results-data"></div>
+            </div>
+            
+            <div id="sheetsList" class="sheets-grid">
+              <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading your Form Submission Response Data...</p>
               </div>
             </div>
           </div>

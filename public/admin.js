@@ -126,7 +126,7 @@ class AntiScreenshotQRGenerator {
 class AdminDashboard {
   constructor() {
     this.currentSessionId = null;
-    this.formManager = new FormManager();
+    this.formManager = new FormManager('admin'); // Use admin mode - load all forms
     this.qrGenerator = new AntiScreenshotQRGenerator();
     this.patternId = 0;
     this.autoRefreshEnabled = true;
@@ -136,9 +136,16 @@ class AdminDashboard {
     this.generateNewSession();
     this.setupEventListeners();
     this.startQRRefreshCycle();
+    
+    // Show loading state for forms
+    this.showFormsLoading();
+    
     try {
       await this.formManager.init();
     } catch (_e) {}
+    
+    // Hide loading state and update dashboard
+    this.hideFormsLoading();
     this.updateDashboard();
     this.updateFormInfo();
   }
@@ -274,6 +281,10 @@ class AdminDashboard {
         try {
           addFormBtn.textContent = "Adding...";
           addFormBtn.disabled = true;
+          
+          // Show loading state while adding form
+          this.showFormsLoading();
+          
           await this.formManager.addForm(name, url, sheetUrl);
           this.updateDashboard();
           this.updateFormInfo();
@@ -308,40 +319,57 @@ class AdminDashboard {
   }
   updateFormsList() {
     const list = document.getElementById("formsList");
+    const loadingEl = document.getElementById("formsLoading");
     if (!list) return;
+    
+    // Hide loading state
+    if (loadingEl) {
+      loadingEl.style.display = "none";
+    }
+    
     if (this.formManager.forms.length === 0) {
-      list.innerHTML =
-        '<p class="no-forms">No forms added yet. Add your first form above.</p>';
+      const emptyStateEl = document.querySelector(".empty-state");
+      if (emptyStateEl) {
+        emptyStateEl.style.display = "block";
+      } else {
+        list.innerHTML =
+          '<div class="empty-state"><i class="fas fa-inbox"></i><h3>No Forms Added</h3><p>No forms added yet. Add your first form above.</p></div>';
+      }
       return;
     }
     list.innerHTML = this.formManager.forms
       .map(
         (form, index) => `
-            <div class="form-item ${
+            <div class="sheet-card ${
               index === this.formManager.currentFormIndex ? "active" : ""
             }">
-                <div class="form-info">
-                    <h4>${form.name}</h4>
-                    <p class="form-url">Form: ${form.url}</p>
-                    ${
-                      form.sheetUrl
-                        ? `<p class="sheet-url">Sheet: ${form.sheetUrl}</p>`
-                        : '<p class="sheet-url no-sheet">No sheet URL provided</p>'
-                    }
-                </div>
-                <div class="form-actions">
-                    <button class="btn btn-small ${
-                      index === this.formManager.currentFormIndex
-                        ? "btn-primary"
-                        : "btn-secondary"
-                    }" onclick="window.adminDashboard.setCurrentForm(${index})">
-                        ${
-                          index === this.formManager.currentFormIndex
-                            ? "Active"
-                            : "Set Active"
-                        }
-                    </button>
-                    <button class="btn btn-small btn-danger" onclick="window.adminDashboard.removeForm(${index})">Remove</button>
+                <div class="sheet-header">
+                    <div class="sheet-title-section">
+                        <h3>${form.name}</h3>
+                        <div class="sheet-details">
+                            <p><strong>Form ID:</strong> ${form.id || 'N/A'}</p>
+                            <p><strong>Form URL:</strong> 
+                                <a href="${form.url}" target="_blank" class="sheet-link">View Form</a>
+                            </p>
+                            ${
+                              form.sheetUrl
+                                ? `<p><strong>Sheet URL:</strong> 
+                                    <a href="${form.sheetUrl}" target="_blank" class="sheet-link">View Sheet</a>
+                                  </p>`
+                                : '<p><strong>Sheet URL:</strong> <span style="color: #dc3545; font-style: italic;">No sheet URL provided</span></p>'
+                            }
+                        </div>
+                    </div>
+                    <div class="sheet-actions">
+                        <button class="btn btn-primary" onclick="window.adminDashboard.setCurrentForm(${index})">
+                            <i class="fas fa-check"></i>
+                            ${index === this.formManager.currentFormIndex ? "Active" : "Set Active"}
+                        </button>
+                        <button class="btn btn-danger" onclick="window.adminDashboard.removeForm(${index})">
+                            <i class="fas fa-trash"></i>
+                            Remove
+                        </button>
+                    </div>
                 </div>
             </div>`
       )
@@ -396,6 +424,31 @@ class AdminDashboard {
         if (n.parentNode) n.parentNode.removeChild(n);
       }, 300);
     }, 3000);
+  }
+  
+  showFormsLoading() {
+    const loadingEl = document.getElementById("formsLoading");
+    const noFormsEl = document.querySelector(".no-forms");
+    const formsList = document.getElementById("formsList");
+    
+    if (loadingEl) {
+      loadingEl.style.display = "flex";
+    }
+    if (noFormsEl) {
+      noFormsEl.style.display = "none";
+    }
+    // Clear any existing forms
+    if (formsList) {
+      const existingForms = formsList.querySelectorAll(".form-item");
+      existingForms.forEach(form => form.remove());
+    }
+  }
+  
+  hideFormsLoading() {
+    const loadingEl = document.getElementById("formsLoading");
+    if (loadingEl) {
+      loadingEl.style.display = "none";
+    }
   }
 }
 

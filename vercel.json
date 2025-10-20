@@ -10,6 +10,10 @@
       "dest": "/api/pages?page=admin"
     },
     {
+      "src": "/instructor/results",
+      "dest": "/api/pages?page=instructor-results"
+    },
+    {
       "src": "/instructor/?(.*)",
       "dest": "/api/pages?page=instructor"
     },

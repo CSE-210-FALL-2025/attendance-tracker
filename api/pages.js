@@ -36,6 +36,14 @@ export default function handler(req, res) {
           "index.html"
         );
         break;
+      case "instructor-results":
+        filePath = path.join(
+          process.cwd(),
+          "public",
+          "instructor",
+          "results.html"
+        );
+        break;
       case "student":
       default:
         filePath = path.join(process.cwd(), "public", "index.html");
